@@ -20,7 +20,7 @@ const StudentModal: React.FC<StudentModalProps> = ({ isOpen, onClose, studentToE
     lastName: '',
     phone: '',
     email: '',
-    pricePerClass: 15000,
+    pricePerClass: 10000,
     status: StudentStatus.ACTIVO,
     examReadiness: ExamReadiness.NO,
     notes: '',
@@ -49,13 +49,14 @@ const StudentModal: React.FC<StudentModalProps> = ({ isOpen, onClose, studentToE
           lastName: '',
           phone: '',
           email: '',
-          pricePerClass: 15000,
+          pricePerClass: 10000,
           status: StudentStatus.ACTIVO,
           examReadiness: ExamReadiness.NO,
           notes: '',
           registrationDate: new Date().toISOString().split('T')[0],
           strengths: [],
-          weaknesses: []
+          weaknesses: [],
+          promoPacks: 0
         });
         setStrengthsText('');
         setWeaknessesText('');
@@ -204,15 +205,42 @@ const StudentModal: React.FC<StudentModalProps> = ({ isOpen, onClose, studentToE
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nivel Examen</label>
-            <select
-              className={inputClass}
-              value={formData.examReadiness}
-              onChange={e => setFormData({ ...formData, examReadiness: e.target.value as ExamReadiness })}
-            >
-              {Object.values(ExamReadiness).map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Nivel Examen</label>
+              <select
+                className={inputClass}
+                value={formData.examReadiness}
+                onChange={e => setFormData({ ...formData, examReadiness: e.target.value as ExamReadiness })}
+              >
+                {Object.values(ExamReadiness).map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                <span className="w-4 h-4 rounded-full bg-yellow-400 border border-yellow-500 block"></span> Packs Promo (10x9)
+              </label>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setFormData(prev => ({ ...prev, promoPacks: Math.max(0, (prev.promoPacks || 0) - 1) }))}
+                  className="w-10 h-10 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 font-bold transition-colors"
+                >
+                  -
+                </button>
+                <div className="flex-1 text-center font-bold text-lg bg-gray-50 py-2 rounded-lg border border-gray-200">
+                  {formData.promoPacks || 0}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setFormData(prev => ({ ...prev, promoPacks: (prev.promoPacks || 0) + 1 }))}
+                  className="w-10 h-10 rounded-lg bg-blue-50 hover:bg-blue-100 flex items-center justify-center text-blue-600 font-bold transition-colors"
+                >
+                  +
+                </button>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">Cada pack son 10 clases a precio promocional.</p>
+            </div>
           </div>
 
           {/* Text Areas */}

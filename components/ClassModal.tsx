@@ -13,7 +13,7 @@ interface ClassModalProps {
 
 const ClassModal: React.FC<ClassModalProps> = ({ isOpen, onClose, initialDate, initialTime, existingClassId }) => {
   const { students, addClass, updateClass, classes, deleteClass, getStudentById } = useStore();
-  
+
   const [formData, setFormData] = useState<Partial<DrivingClass>>({
     studentId: '',
     date: initialDate || new Date().toISOString().split('T')[0],
@@ -22,7 +22,7 @@ const ClassModal: React.FC<ClassModalProps> = ({ isOpen, onClose, initialDate, i
     type: ClassType.PRACTICA,
     status: ClassStatus.PROGRAMADA,
     paymentStatus: PaymentStatus.PENDIENTE,
-    price: 15000,
+    price: 10000,
     notes: ''
   });
 
@@ -33,15 +33,15 @@ const ClassModal: React.FC<ClassModalProps> = ({ isOpen, onClose, initialDate, i
         if (cls) setFormData(cls);
       } else {
         setFormData({
-            studentId: '',
-            date: initialDate || new Date().toISOString().split('T')[0],
-            startTime: initialTime || '09:00',
-            durationMinutes: 60,
-            type: ClassType.PRACTICA,
-            status: ClassStatus.PROGRAMADA,
-            paymentStatus: PaymentStatus.PENDIENTE,
-            price: 15000,
-            notes: ''
+          studentId: '',
+          date: initialDate || new Date().toISOString().split('T')[0],
+          startTime: initialTime || '09:00',
+          durationMinutes: 60,
+          type: ClassType.PRACTICA,
+          status: ClassStatus.PROGRAMADA,
+          paymentStatus: PaymentStatus.PENDIENTE,
+          price: 10000,
+          notes: ''
         });
       }
     }
@@ -50,18 +50,18 @@ const ClassModal: React.FC<ClassModalProps> = ({ isOpen, onClose, initialDate, i
   // Calculate class statistics for selected student
   const studentStats = useMemo(() => {
     if (!formData.studentId) return null;
-    
+
     // Get all classes for this student
     const studentClasses = classes.filter(c => c.studentId === formData.studentId);
-    
+
     // If editing, find the number of THIS class
     if (existingClassId) {
-        // Sort chronologically
-        const sorted = [...studentClasses].sort((a, b) => 
-            new Date(`${a.date}T${a.startTime}`).getTime() - new Date(`${b.date}T${b.startTime}`).getTime()
-        );
-        const index = sorted.findIndex(c => c.id === existingClassId);
-        return { count: studentClasses.length, currentNumber: index + 1 };
+      // Sort chronologically
+      const sorted = [...studentClasses].sort((a, b) =>
+        new Date(`${a.date}T${a.startTime}`).getTime() - new Date(`${b.date}T${b.startTime}`).getTime()
+      );
+      const index = sorted.findIndex(c => c.id === existingClassId);
+      return { count: studentClasses.length, currentNumber: index + 1 };
     }
 
     // If new, it will be count + 1
@@ -73,10 +73,29 @@ const ClassModal: React.FC<ClassModalProps> = ({ isOpen, onClose, initialDate, i
   const handleStudentChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const studentId = e.target.value;
     const student = getStudentById(studentId);
+
+    // Calculate if this new class would be a promo class
+    let price = 10000;
+    let paymentStatus = PaymentStatus.PENDIENTE;
+
+    if (student) {
+      const studentClasses = classes.filter(c => c.studentId === studentId);
+      const nextClassNumber = studentClasses.length + 1;
+      const promoLimit = (student.promoPacks || 0) * 10;
+
+      if (nextClassNumber <= promoLimit) {
+        price = 9000;
+        paymentStatus = PaymentStatus.PAGADO;
+      } else {
+        price = student.pricePerClass;
+      }
+    }
+
     setFormData(prev => ({
-        ...prev,
-        studentId,
-        price: student ? student.pricePerClass : 15000
+      ...prev,
+      studentId,
+      price,
+      paymentStatus
     }));
   };
 
@@ -139,15 +158,34 @@ const ClassModal: React.FC<ClassModalProps> = ({ isOpen, onClose, initialDate, i
               ))}
             </select>
             {formData.studentId && studentStats && (
-                <div className="mt-2 text-sm bg-blue-50 text-blue-800 px-3 py-2 rounded-lg flex items-center gap-2 border border-blue-100">
-                    <Hash size={14} />
-                    <span className="font-semibold">
-                        {existingClassId 
-                            ? `Esta es la clase #${studentStats.currentNumber} del alumno.` 
-                            : `Esta será la clase #${studentStats.currentNumber} (Historial: ${studentStats.count})`
-                        }
-                    </span>
+              <div className="mt-2 text-sm bg-blue-50 text-blue-800 px-3 py-2 rounded-lg flex items-center gap-2 border border-blue-100 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <Hash size={14} />
+                  <span className="font-semibold">
+                    {existingClassId
+                      ? `Esta es la clase #${studentStats.currentNumber} del alumno.`
+                      : `Esta será la clase #${studentStats.currentNumber} (Historial: ${studentStats.count})`
+                    }
+                  </span>
                 </div>
+
+                {/* Promo Indicator */}
+                {(() => {
+                  const student = students.find(s => s.id === formData.studentId);
+                  if (student && student.promoPacks && student.promoPacks > 0) {
+                    const promoLimit = student.promoPacks * 10;
+                    if (studentStats.currentNumber <= promoLimit) {
+                      const currentInPack = (studentStats.currentNumber - 1) % 10 + 1;
+                      return (
+                        <span className="font-bold text-yellow-600 bg-yellow-100 px-2 py-0.5 rounded-full border border-yellow-200 ml-auto">
+                          Promo: {currentInPack}/10
+                        </span>
+                      );
+                    }
+                  }
+                  return null;
+                })()}
+              </div>
             )}
           </div>
 
@@ -179,108 +217,109 @@ const ClassModal: React.FC<ClassModalProps> = ({ isOpen, onClose, initialDate, i
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-             <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Duración (min)</label>
-                <select 
-                    className="w-full border border-gray-300 rounded-lg p-2.5 outline-none"
-                    value={formData.durationMinutes}
-                    onChange={e => setFormData({...formData, durationMinutes: Number(e.target.value)})}
-                >
-                    <option value={30}>30 min</option>
-                    <option value={45}>45 min</option>
-                    <option value={60}>60 min</option>
-                    <option value={90}>90 min</option>
-                </select>
-             </div>
-             <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
-                    <DollarSign size={16} /> Precio ($)
-                </label>
-                <input
-                    type="number"
-                    className="w-full border border-gray-300 rounded-lg p-2.5 outline-none"
-                    value={formData.price}
-                    onChange={e => setFormData({...formData, price: Number(e.target.value)})}
-                />
-             </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Duración (min)</label>
+              <select
+                className="w-full border border-gray-300 rounded-lg p-2.5 outline-none"
+                value={formData.durationMinutes}
+                onChange={e => setFormData({ ...formData, durationMinutes: Number(e.target.value) })}
+              >
+                <option value={30}>30 min</option>
+                <option value={45}>45 min</option>
+                <option value={60}>60 min</option>
+                <option value={90}>90 min</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                <DollarSign size={16} /> Precio ($)
+              </label>
+              <input
+                type="number"
+                className="w-full border border-gray-300 rounded-lg p-2.5 outline-none"
+                value={formData.price}
+                onChange={e => setFormData({ ...formData, price: Number(e.target.value) })}
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-             <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Estado Clase</label>
-                <select 
-                    className="w-full border border-gray-300 rounded-lg p-2.5 outline-none"
-                    value={formData.status}
-                    onChange={e => setFormData({...formData, status: e.target.value as ClassStatus})}
-                >
-                    {Object.values(ClassStatus).map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
-             </div>
-             <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
-                  <CreditCard size={16} /> Estado Pago
-                </label>
-                <select 
-                    className={`w-full border border-gray-300 rounded-lg p-2.5 outline-none font-medium ${
-                        formData.paymentStatus === PaymentStatus.PAGADO ? 'text-green-600 bg-green-50' : 'text-orange-600 bg-orange-50'
-                    }`}
-                    value={formData.paymentStatus}
-                    onChange={e => setFormData({...formData, paymentStatus: e.target.value as PaymentStatus})}
-                >
-                    {Object.values(PaymentStatus).map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
-             </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Estado Clase</label>
+              <select
+                className="w-full border border-gray-300 rounded-lg p-2.5 outline-none"
+                value={formData.status}
+                onChange={e => setFormData({ ...formData, status: e.target.value as ClassStatus })}
+              >
+                {Object.values(ClassStatus).map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                <CreditCard size={16} /> Estado Pago
+              </label>
+              <select
+                className={`w-full border border-gray-300 rounded-lg p-2.5 outline-none font-medium ${formData.paymentStatus === PaymentStatus.PAGADO ? 'text-green-600 bg-green-50' : 'text-orange-600 bg-orange-50'
+                  }`}
+                value={formData.paymentStatus}
+                onChange={e => setFormData({ ...formData, paymentStatus: e.target.value as PaymentStatus })}
+              >
+                {Object.values(PaymentStatus)
+                  .filter(s => s !== PaymentStatus.FACTURADO)
+                  .map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
           </div>
 
           <div>
-             <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Clase</label>
-                <select 
-                    className="w-full border border-gray-300 rounded-lg p-2.5 outline-none"
-                    value={formData.type}
-                    onChange={e => setFormData({...formData, type: e.target.value as ClassType})}
-                >
-                    {Object.values(ClassType).map(t => <option key={t} value={t}>{t}</option>)}
-                </select>
-             </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Clase</label>
+              <select
+                className="w-full border border-gray-300 rounded-lg p-2.5 outline-none"
+                value={formData.type}
+                onChange={e => setFormData({ ...formData, type: e.target.value as ClassType })}
+              >
+                {Object.values(ClassType).map(t => <option key={t} value={t}>{t}</option>)}
+              </select>
+            </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
-                <FileText size={16} /> Notas
+              <FileText size={16} /> Notas
             </label>
             <textarea
-                rows={2}
-                className="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-blue-500"
-                placeholder="Notas sobre la clase..."
-                value={formData.notes}
-                onChange={e => setFormData({...formData, notes: e.target.value})}
+              rows={2}
+              className="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-blue-500"
+              placeholder="Notas sobre la clase..."
+              value={formData.notes}
+              onChange={e => setFormData({ ...formData, notes: e.target.value })}
             />
           </div>
 
           <div className="flex gap-3 pt-4 border-t border-gray-100 mt-2">
             {existingClassId && (
-                <button 
-                    type="button" 
-                    onClick={handleDelete}
-                    className="px-4 py-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg flex items-center gap-2 transition-colors"
-                >
-                    <Trash2 size={18} /> Eliminar
-                </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="px-4 py-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg flex items-center gap-2 transition-colors"
+              >
+                <Trash2 size={18} /> Eliminar
+              </button>
             )}
             <div className="flex-1"></div>
-            <button 
-                type="button" 
-                onClick={onClose}
-                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
             >
-                Cancelar
+              Cancelar
             </button>
-            <button 
-                type="submit"
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 shadow-lg shadow-blue-500/30 transition-all"
+            <button
+              type="submit"
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 shadow-lg shadow-blue-500/30 transition-all"
             >
-                <Save size={18} /> Guardar
+              <Save size={18} /> Guardar
             </button>
           </div>
         </form>
