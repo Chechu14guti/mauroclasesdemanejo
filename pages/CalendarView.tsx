@@ -141,34 +141,34 @@ const CalendarView: React.FC = () => {
   return (
     <div className="flex flex-col h-full gap-4">
       {/* Header Controls */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 transition-colors">
         <div className="flex items-center gap-4">
-          <div className="flex items-center bg-gray-100 rounded-lg p-1">
+          <div className="flex items-center bg-gray-100 dark:bg-slate-700 rounded-lg p-1">
             <button
               onClick={() => setViewMode('week')}
-              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${viewMode === 'week' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${viewMode === 'week' ? 'bg-white dark:bg-slate-600 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
             >
               Semana
             </button>
             <button
               onClick={() => setViewMode('month')}
-              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${viewMode === 'month' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${viewMode === 'month' ? 'bg-white dark:bg-slate-600 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
             >
               Mes
             </button>
           </div>
-          <div className="flex items-center gap-2">
-            <button onClick={handlePrev} className="p-1 hover:bg-gray-100 rounded-full"><ChevronLeft size={20} /></button>
+          <div className="flex items-center gap-2 text-gray-900 dark:text-white">
+            <button onClick={handlePrev} className="p-1 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-full"><ChevronLeft size={20} /></button>
             <h2 className="text-lg font-bold w-40 text-center">
               {currentDate.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' })}
             </h2>
-            <button onClick={handleNext} className="p-1 hover:bg-gray-100 rounded-full"><ChevronRight size={20} /></button>
+            <button onClick={handleNext} className="p-1 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-full"><ChevronRight size={20} /></button>
           </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           <select
-            className="border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
             value={filterStudent}
             onChange={(e) => setFilterStudent(e.target.value)}
           >
@@ -177,7 +177,7 @@ const CalendarView: React.FC = () => {
           </select>
           <button
             onClick={() => { setSelectedClassId(null); setSelectedSlot(null); setIsModalOpen(true); }}
-            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium"
+            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium shadow-lg shadow-blue-500/30"
           >
             <Plus size={16} /> <span className="hidden sm:inline">Nueva Clase</span>
           </button>
@@ -185,39 +185,39 @@ const CalendarView: React.FC = () => {
       </div>
 
       {/* Legend */}
-      <div className="flex gap-6 text-xs text-gray-600 px-2 bg-white p-2 rounded-lg border border-gray-100 w-fit">
+      <div className="flex gap-6 text-xs text-gray-600 dark:text-gray-300 px-2 bg-white dark:bg-slate-800 p-2 rounded-lg border border-gray-100 dark:border-slate-700 w-fit transition-colors">
         <span className="font-semibold">Estado de Pago:</span>
         <div className="flex items-center gap-2">
-          <span className="w-3 h-3 rounded bg-green-200 border border-green-300"></span>
+          <span className="w-3 h-3 rounded bg-green-200 border border-green-300 dark:bg-green-900 dark:border-green-700"></span>
           <span>Pagada</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="w-3 h-3 rounded bg-orange-200 border border-orange-300"></span>
+          <span className="w-3 h-3 rounded bg-orange-200 border border-orange-300 dark:bg-orange-900 dark:border-orange-700"></span>
           <span>Pendiente / No Pagada</span>
         </div>
       </div>
 
       {/* Calendar Grid */}
-      <div className="flex-1 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
+      <div className="flex-1 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden flex flex-col transition-colors">
         {viewMode === 'week' ? (
           <div className="flex flex-col h-full overflow-hidden">
             {/* Week Header */}
-            <div className="grid grid-cols-8 border-b border-gray-200 bg-gray-50">
-              <div className="p-4 text-center text-xs font-semibold text-gray-400 border-r">HORA</div>
+            <div className="grid grid-cols-8 border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900/50">
+              <div className="p-4 text-center text-xs font-semibold text-gray-400 border-r dark:border-slate-700">HORA</div>
               {weekDays.map((day, i) => {
                 const dateStr = formatDate(day);
                 const dayClasses = getClassesForDate(dateStr);
                 const isToday = formatDate(new Date()) === dateStr;
                 return (
-                  <div key={i} className={`p-2 text-center border-r last:border-r-0 ${isToday ? 'bg-blue-50/50' : ''}`}>
-                    <div className={`text-xs uppercase font-bold ${isToday ? 'text-blue-600' : 'text-gray-500'}`}>
+                  <div key={i} className={`p-2 text-center border-r-2 dark:border-r border-gray-200 dark:border-slate-700 last:border-r-0 ${isToday ? 'bg-blue-100 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800' : 'bg-white dark:bg-slate-800'}`}>
+                    <div className={`text-xs uppercase font-bold ${isToday ? 'text-blue-700 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'}`}>
                       {day.toLocaleDateString('es-AR', { weekday: 'short' })}
                     </div>
-                    <div className={`text-lg font-bold ${isToday ? 'text-blue-700' : 'text-gray-800'}`}>
+                    <div className={`text-2xl font-black ${isToday ? 'text-blue-800 dark:text-blue-300' : 'text-gray-800 dark:text-gray-200'}`}>
                       {day.getDate()}
                     </div>
                     {dayClasses.length > 0 && (
-                      <div className="mt-1 inline-block bg-blue-100 text-blue-700 text-[10px] px-2 py-0.5 rounded-full font-medium">
+                      <div className={`mt-1 inline-block text-[10px] px-2 py-0.5 rounded-full font-bold ${isToday ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300'}`}>
                         {dayClasses.length} clases
                       </div>
                     )}
@@ -229,11 +229,11 @@ const CalendarView: React.FC = () => {
             <div className="overflow-y-auto flex-1 h-[600px]">
               <div className="grid grid-cols-8">
                 {/* Time Column */}
-                <div className="col-span-1 border-r border-gray-200">
+                <div className="col-span-1 border-r border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800">
                   {Array.from({ length: 15 }).map((_, i) => {
                     const hour = i + 7; // Start at 7 AM
                     return (
-                      <div key={hour} className="h-20 border-b border-gray-100 text-xs text-gray-400 p-2 text-center">
+                      <div key={hour} className="h-20 border-b border-gray-100 dark:border-slate-700 text-xs text-gray-400 p-2 text-center">
                         {hour}:00
                       </div>
                     )
@@ -242,8 +242,9 @@ const CalendarView: React.FC = () => {
                 {/* Days Columns */}
                 {weekDays.map((day, dIndex) => {
                   const dateStr = formatDate(day);
+                  const isToday = formatDate(new Date()) === dateStr;
                   return (
-                    <div key={dIndex} className="col-span-1 border-r border-gray-200 last:border-r-0 relative">
+                    <div key={dIndex} className={`col-span-1 border-r-2 dark:border-r border-gray-200 dark:border-slate-700 last:border-r-0 relative ${isToday ? 'bg-blue-50/40 dark:bg-blue-900/10' : 'bg-white dark:bg-slate-800'}`}>
                       {Array.from({ length: 15 }).map((_, hIndex) => {
                         const hour = hIndex + 7;
                         const timeStr = `${String(hour).padStart(2, '0')}:00`;
@@ -254,7 +255,7 @@ const CalendarView: React.FC = () => {
                         return (
                           <div
                             key={`${dIndex}-${hIndex}`}
-                            className="h-20 border-b border-gray-100 hover:bg-gray-50 transition-colors p-1 relative group"
+                            className={`h-20 border-b border-gray-100 dark:border-slate-700 p-1 relative group ${isToday ? 'hover:bg-blue-100/50 dark:hover:bg-blue-900/20' : 'hover:bg-gray-50 dark:hover:bg-slate-700'} transition-colors`}
                             onClick={() => handleSlotClick(dateStr, timeStr)}
                           >
                             <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 text-blue-500 z-10">
@@ -272,16 +273,16 @@ const CalendarView: React.FC = () => {
           </div>
         ) : (
           <div className="h-full flex flex-col">
-            <div className="grid grid-cols-7 border-b border-gray-200 bg-gray-50">
+            <div className="grid grid-cols-7 border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900/50">
               {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map(d => (
-                <div key={d} className="p-3 text-center text-sm font-semibold text-gray-500 border-r last:border-r-0">
+                <div key={d} className="p-3 text-center text-sm font-semibold text-gray-500 dark:text-gray-400 border-r dark:border-slate-700 last:border-r-0">
                   {d}
                 </div>
               ))}
             </div>
-            <div className="grid grid-cols-7 flex-1 auto-rows-fr">
+            <div className="grid grid-cols-7 flex-1 auto-rows-fr bg-white dark:bg-slate-800">
               {daysInMonth.map((day, i) => {
-                if (!day) return <div key={`empty-${i}`} className="bg-gray-50/30 border-b border-r border-gray-100" />;
+                if (!day) return <div key={`empty-${i}`} className="bg-gray-50/30 dark:bg-slate-900/30 border-b border-r border-gray-100 dark:border-slate-700" />;
 
                 const dateStr = formatDate(day);
                 const dayClasses = getClassesForDate(dateStr);
@@ -290,15 +291,15 @@ const CalendarView: React.FC = () => {
                 return (
                   <div
                     key={dateStr}
-                    className={`min-h-[100px] border-b border-r border-gray-100 p-2 transition-colors hover:bg-gray-50 cursor-pointer flex flex-col ${isToday ? 'bg-blue-50/30' : ''}`}
+                    className={`min-h-[100px] border-b border-r border-gray-200 dark:border-slate-700 p-2 transition-colors hover:bg-gray-50 dark:hover:bg-slate-700 cursor-pointer flex flex-col ${isToday ? 'bg-blue-50 dark:bg-blue-900/20 ring-2 ring-inset ring-blue-200 dark:ring-blue-800' : ''}`}
                     onClick={() => handleSlotClick(dateStr, '09:00')}
                   >
                     <div className="flex justify-between items-start mb-2">
-                      <span className={`text-sm font-medium h-7 w-7 flex items-center justify-center rounded-full ${isToday ? 'bg-blue-600 text-white' : 'text-gray-700'}`}>
+                      <span className={`text-sm font-bold h-7 w-7 flex items-center justify-center rounded-full ${isToday ? 'bg-blue-600 text-white shadow-md' : 'text-gray-700 dark:text-gray-300'}`}>
                         {day.getDate()}
                       </span>
                       {dayClasses.length > 0 && (
-                        <span className="text-[10px] font-bold text-gray-400">{dayClasses.length} clases</span>
+                        <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500">{dayClasses.length} clases</span>
                       )}
                     </div>
                     <div className="flex-1 space-y-1 overflow-y-auto max-h-[80px]">

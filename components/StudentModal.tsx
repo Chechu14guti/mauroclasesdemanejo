@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Save, User, Phone, Mail, FileText, DollarSign, Activity, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { X, Save, User, Phone, Mail, FileText, DollarSign, Activity, ThumbsUp, ThumbsDown, AlertCircle, Hash, Award } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 import { ExamReadiness, Student, StudentStatus } from '../types';
 
@@ -102,25 +102,26 @@ const StudentModal: React.FC<StudentModalProps> = ({ isOpen, onClose, studentToE
   };
 
   // Changed bg-white to bg-gray-100 and added text-gray-900 for high visibility
-  const inputClass = "w-full border border-gray-300 rounded-lg p-2.5 outline-none bg-gray-100 text-gray-900 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all";
+  // const inputClass = "w-full border border-gray-300 rounded-lg p-2.5 outline-none bg-gray-100 text-gray-900 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all";
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-fade-in flex flex-col">
-        <div className="flex justify-between items-center p-4 border-b border-gray-100 bg-gray-50 sticky top-0 z-10">
-          <h2 className="text-lg font-bold text-gray-800">
+      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden animate-fade-in transition-colors">
+        <div className="flex justify-between items-center p-4 border-b border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-900/50">
+          <h2 className="text-lg font-bold text-gray-800 dark:text-white">
             {studentToEdit ? 'Editar Alumno' : 'Nuevo Alumno'}
           </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
             <X size={24} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-6 max-h-[80vh] overflow-y-auto custom-scrollbar">
           {error && (
-            <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm border border-red-200">
+            <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-lg text-sm flex items-center gap-2">
+              <AlertCircle size={16} />
               {error}
             </div>
           )}
@@ -128,23 +129,21 @@ const StudentModal: React.FC<StudentModalProps> = ({ isOpen, onClose, studentToE
           {/* Personal Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
-                <User size={16} /> Nombre
-              </label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nombre</label>
               <input
                 type="text"
                 required
-                className={inputClass}
+                className="w-full border border-gray-300 dark:border-slate-600 rounded-lg p-2.5 outline-none focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
                 value={formData.firstName}
                 onChange={e => setFormData({ ...formData, firstName: e.target.value })}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Apellido</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Apellido</label>
               <input
                 type="text"
                 required
-                className={inputClass}
+                className="w-full border border-gray-300 dark:border-slate-600 rounded-lg p-2.5 outline-none focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
                 value={formData.lastName}
                 onChange={e => setFormData({ ...formData, lastName: e.target.value })}
               />
@@ -153,24 +152,24 @@ const StudentModal: React.FC<StudentModalProps> = ({ isOpen, onClose, studentToE
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-2">
                 <Phone size={16} /> Teléfono
               </label>
               <input
                 type="tel"
                 required
-                className={inputClass}
+                className="w-full border border-gray-300 dark:border-slate-600 rounded-lg p-2.5 outline-none focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
                 value={formData.phone}
                 onChange={e => setFormData({ ...formData, phone: e.target.value })}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
-                <Mail size={16} /> Email <span className="text-gray-400 text-xs">(Opcional)</span>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-2">
+                <Mail size={16} /> Email (Opcional)
               </label>
               <input
                 type="email"
-                className={inputClass}
+                className="w-full border border-gray-300 dark:border-slate-600 rounded-lg p-2.5 outline-none focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
                 value={formData.email}
                 onChange={e => setFormData({ ...formData, email: e.target.value })}
               />
@@ -180,117 +179,116 @@ const StudentModal: React.FC<StudentModalProps> = ({ isOpen, onClose, studentToE
           {/* Academic Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
-                <DollarSign size={16} /> Precio por Clase
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-2">
+                <DollarSign size={16} /> Precio por Clase ($)
               </label>
               <input
                 type="number"
-                required
-                className={inputClass}
+                className="w-full border border-gray-300 dark:border-slate-600 rounded-lg p-2.5 outline-none focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
                 value={formData.pricePerClass}
                 onChange={e => setFormData({ ...formData, pricePerClass: Number(e.target.value) })}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
-                <Activity size={16} /> Estado Alumno
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-2">
+                <Hash size={16} /> Packs Promo (10x9)
               </label>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setFormData(prev => ({ ...prev, promoPacks: Math.max(0, (prev.promoPacks || 0) - 1) }))}
+                  className="p-2 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-lg transition-colors text-gray-600 dark:text-gray-300"
+                >
+                  -
+                </button>
+                <span className="font-bold text-lg w-8 text-center text-gray-900 dark:text-white">{formData.promoPacks || 0}</span>
+                <button
+                  type="button"
+                  onClick={() => setFormData(prev => ({ ...prev, promoPacks: (prev.promoPacks || 0) + 1 }))}
+                  className="p-2 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-lg transition-colors text-gray-600 dark:text-gray-300"
+                >
+                  +
+                </button>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Cada pack son 10 clases al precio de 9 ($9000 c/u).
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Estado</label>
               <select
-                className={inputClass}
+                className="w-full border border-gray-300 dark:border-slate-600 rounded-lg p-2.5 outline-none bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
                 value={formData.status}
                 onChange={e => setFormData({ ...formData, status: e.target.value as StudentStatus })}
               >
                 {Object.values(StudentStatus).map(s => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nivel Examen</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-2">
+                <Award size={16} /> Preparación Examen
+              </label>
               <select
-                className={inputClass}
+                className="w-full border border-gray-300 dark:border-slate-600 rounded-lg p-2.5 outline-none bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
                 value={formData.examReadiness}
                 onChange={e => setFormData({ ...formData, examReadiness: e.target.value as ExamReadiness })}
               >
                 {Object.values(ExamReadiness).map(s => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
-                <span className="w-4 h-4 rounded-full bg-yellow-400 border border-yellow-500 block"></span> Packs Promo (10x9)
-              </label>
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => setFormData(prev => ({ ...prev, promoPacks: Math.max(0, (prev.promoPacks || 0) - 1) }))}
-                  className="w-10 h-10 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 font-bold transition-colors"
-                >
-                  -
-                </button>
-                <div className="flex-1 text-center font-bold text-lg bg-gray-50 py-2 rounded-lg border border-gray-200">
-                  {formData.promoPacks || 0}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setFormData(prev => ({ ...prev, promoPacks: (prev.promoPacks || 0) + 1 }))}
-                  className="w-10 h-10 rounded-lg bg-blue-50 hover:bg-blue-100 flex items-center justify-center text-blue-600 font-bold transition-colors"
-                >
-                  +
-                </button>
-              </div>
-              <p className="text-xs text-gray-500 mt-1">Cada pack son 10 clases a precio promocional.</p>
-            </div>
           </div>
 
           {/* Text Areas */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
-              <FileText size={16} /> Notas Generales
-            </label>
-            <textarea
-              rows={2}
-              className={inputClass}
-              placeholder="Disponibilidad, preferencias, etc."
-              value={formData.notes}
-              onChange={e => setFormData({ ...formData, notes: e.target.value })}
-            />
-          </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
-                <ThumbsUp size={16} /> Puntos Fuertes
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-2">
+                <ThumbsUp size={16} /> Fortalezas (una por línea)
               </label>
               <textarea
                 rows={3}
-                className={`${inputClass} text-sm`}
-                placeholder="Escribe cada punto en una línea nueva..."
+                className="w-full border border-gray-300 dark:border-slate-600 rounded-lg p-2.5 outline-none focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                placeholder="Ej: Estacionamiento&#10;Control del embrague"
                 value={strengthsText}
                 onChange={e => setStrengthsText(e.target.value)}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
-                <ThumbsDown size={16} /> A Mejorar
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-2">
+                <ThumbsDown size={16} /> A mejorar (una por línea)
               </label>
               <textarea
                 rows={3}
-                className={`${inputClass} text-sm`}
-                placeholder="Escribe cada punto en una línea nueva..."
+                className="w-full border border-gray-300 dark:border-slate-600 rounded-lg p-2.5 outline-none focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                placeholder="Ej: Giros cerrados&#10;Atención a espejos"
                 value={weaknessesText}
                 onChange={e => setWeaknessesText(e.target.value)}
               />
             </div>
           </div>
 
-          <div className="flex gap-3 pt-4 border-t border-gray-100 mt-2 sticky bottom-0 bg-white">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-2">
+              <FileText size={16} /> Observaciones Generales
+            </label>
+            <textarea
+              rows={2}
+              className="w-full border border-gray-300 dark:border-slate-600 rounded-lg p-2.5 outline-none focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+              placeholder="Notas generales sobre el alumno..."
+              value={formData.notes}
+              onChange={e => setFormData({ ...formData, notes: e.target.value })}
+            />
+          </div>
+
+          <div className="flex gap-3 pt-4 border-t border-gray-100 dark:border-slate-700 mt-2">
             <div className="flex-1"></div>
             <button
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors disabled:opacity-50"
             >
               Cancelar
             </button>

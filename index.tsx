@@ -6,6 +6,7 @@ import App from './App';
 // Providers de contexto
 import { AuthProvider } from './context/AuthContext';
 import { StoreProvider } from './context/StoreContext';
+import { ThemeProvider } from './context/ThemeContext';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -18,7 +19,9 @@ root.render(
   <React.StrictMode>
     <AuthProvider>
       <StoreProvider>
-        <App />
+        <ThemeProvider>
+          <App />
+        </ThemeProvider>
       </StoreProvider>
     </AuthProvider>
   </React.StrictMode>

@@ -40,81 +40,66 @@ const Login: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-slate-900 p-4 relative overflow-hidden">
-            {/* Background decoration */}
-            <div className="absolute top-[-10%] right-[-5%] w-96 h-96 bg-blue-600/20 rounded-full blur-3xl"></div>
-            <div className="absolute bottom-[-10%] left-[-5%] w-96 h-96 bg-orange-500/10 rounded-full blur-3xl"></div>
-
-            <div className="w-full max-w-md bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden z-10">
-                {/* Header */}
-                <div className="bg-slate-950 p-8 flex flex-col items-center justify-center border-b-4 border-orange-500">
-                    <div className="bg-white/10 p-4 rounded-full mb-2">
-                        <BrandLogo className="w-20 h-20" showText={false} />
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-900 p-4 transition-colors">
+            <div className="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-100 dark:border-slate-700">
+                <div className="flex flex-col items-center mb-8">
+                    <div className="w-16 h-16 text-orange-500 bg-orange-50 dark:bg-orange-900/20 rounded-full p-2 mb-4">
+                        <BrandLogo className="w-full h-full" showText={false} />
                     </div>
-                    <h1 className="text-3xl font-black text-white tracking-tight">MAURO</h1>
-                    <p className="text-xs font-bold text-orange-500 uppercase tracking-[0.3em]">Clases de Manejo</p>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Bienvenido</h1>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm">Inicia sesión para gestionar tus clases</p>
                 </div>
 
-                <div className="p-8">
-                    <h2 className="text-xl font-bold text-gray-800 text-center mb-6">Acceso Administrativo</h2>
-
-                    {error && (
-                        <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm flex items-center gap-2 animate-fade-in">
-                            <AlertCircle size={16} />
-                            {error}
-                        </div>
-                    )}
-
-                    <form onSubmit={handleSubmit} className="space-y-5">
-                        <div className="space-y-1">
-                            <label className="block text-sm font-medium text-gray-700">Correo Electrónico</label>
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-                                    <Mail size={18} />
-                                </div>
-                                <input
-                                    type="email"
-                                    required
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg leading-5 bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                                    placeholder="admin@mauroclases.com"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="space-y-1">
-                            <label className="block text-sm font-medium text-gray-700">Contraseña</label>
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-                                    <Lock size={18} />
-                                </div>
-                                <input
-                                    type="password"
-                                    required
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg leading-5 bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                                    placeholder="••••••••"
-                                />
-                            </div>
-                        </div>
-
-                        <button
-                            type="submit"
-                            disabled={isSubmitting}
-                            className="w-full flex items-center justify-center gap-2 py-3 px-4 border border-transparent rounded-lg shadow-md text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                        >
-                            {isSubmitting ? 'Iniciando...' : 'Ingresar al Sistema'}
-                            {!isSubmitting && <ArrowRight size={18} />}
-                        </button>
-                    </form>
-
-                    <div className="mt-6 text-center">
-                        <p className="text-xs text-gray-400">
-                            Panel de gestión exclusivo para personal autorizado.
-                        </p>
+                {error && (
+                    <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-lg text-sm mb-6 flex items-center gap-2">
+                        <AlertCircle size={16} />
+                        {error}
                     </div>
+                )}
+
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+                        <div className="relative">
+                            <Mail className="absolute left-3 top-3 text-gray-400" size={20} />
+                            <input
+                                type="email"
+                                required
+                                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white transition-colors"
+                                placeholder="tu@email.com"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Contraseña</label>
+                        <div className="relative">
+                            <Lock className="absolute left-3 top-3 text-gray-400" size={20} />
+                            <input
+                                type="password"
+                                required
+                                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white transition-colors"
+                                placeholder="••••••••"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                            />
+                        </div>
+                    </div>
+
+                    <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="w-full bg-blue-600 text-white py-2.5 rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/30 flex justify-center items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                    >
+                        {isSubmitting ? 'Iniciando...' : 'Iniciar Sesión'}
+                        {!isSubmitting && <ArrowRight size={20} />}
+                    </button>
+                </form>
+
+                <div className="mt-8 text-center text-xs text-gray-400 dark:text-gray-500">
+                    &copy; {new Date().getFullYear()} Mauro Clases de Manejo
                 </div>
             </div>
         </div>
