@@ -23,7 +23,8 @@ const ClassModal: React.FC<ClassModalProps> = ({ isOpen, onClose, initialDate, i
     status: ClassStatus.PROGRAMADA,
     paymentStatus: PaymentStatus.PENDIENTE,
     price: 10000,
-    notes: ''
+    notes: '',
+    paymentMethod: undefined
   });
 
   useEffect(() => {
@@ -41,7 +42,8 @@ const ClassModal: React.FC<ClassModalProps> = ({ isOpen, onClose, initialDate, i
           status: ClassStatus.PROGRAMADA,
           paymentStatus: PaymentStatus.PENDIENTE,
           price: 10000,
-          notes: ''
+          notes: '',
+          paymentMethod: undefined
         });
       }
     }
@@ -271,6 +273,39 @@ const ClassModal: React.FC<ClassModalProps> = ({ isOpen, onClose, initialDate, i
             </div>
           </div>
 
+          {/* Payment Method Selector - Only visible when Paid */}
+          {formData.paymentStatus === PaymentStatus.PAGADO && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-2">
+                <DollarSign size={16} /> Método de Pago
+              </label>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="Efectivo"
+                    checked={formData.paymentMethod === 'Efectivo'}
+                    onChange={() => setFormData({ ...formData, paymentMethod: 'Efectivo' })}
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                  />
+                  <span className="text-gray-900 dark:text-white">Efectivo</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="Transferencia"
+                    checked={formData.paymentMethod === 'Transferencia'}
+                    onChange={() => setFormData({ ...formData, paymentMethod: 'Transferencia' })}
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                  />
+                  <span className="text-gray-900 dark:text-white">Transferencia</span>
+                </label>
+              </div>
+            </div>
+          )}
+
           <div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipo de Clase</label>
@@ -323,8 +358,8 @@ const ClassModal: React.FC<ClassModalProps> = ({ isOpen, onClose, initialDate, i
             </button>
           </div>
         </form>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 };
 

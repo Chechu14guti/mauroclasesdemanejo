@@ -64,6 +64,7 @@ export interface DrivingClass {
   price: number;
   notes: string; // Notas de la sesión
   location?: string;
+  paymentMethod?: 'Efectivo' | 'Transferencia';
 }
 
 export interface Payment {
