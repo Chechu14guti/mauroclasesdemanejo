@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { X, Save, Trash2, User, Calendar, Clock, FileText, DollarSign, CreditCard, Hash } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 import { ClassStatus, ClassType, DrivingClass, PaymentStatus } from '../types';
+import ConfirmModal from './ConfirmModal';
 
 interface ClassModalProps {
   isOpen: boolean;
@@ -26,6 +27,9 @@ const ClassModal: React.FC<ClassModalProps> = ({ isOpen, onClose, initialDate, i
     notes: '',
     paymentMethod: undefined
   });
+
+  const [error, setError] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -103,7 +107,20 @@ const ClassModal: React.FC<ClassModalProps> = ({ isOpen, onClose, initialDate, i
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     if (!formData.studentId || !formData.date || !formData.startTime) return;
+
+    // Validation: If Paid, Payment Method is mandatory
+    if (formData.paymentStatus === PaymentStatus.PAGADO && !formData.paymentMethod) {
+      setError('⚠️ Debes indicar si el pago fue en Efectivo o Transferencia.');
+      return;
+    }
+
+    // Validation: Price is mandatory
+    if (!formData.price || formData.price <= 0) {
+      setError('⚠️ El precio de la clase es obligatorio.');
+      return;
+    }
 
     // Calculate End Time simple logic
     const [hours, minutes] = (formData.startTime as string).split(':').map(Number);
@@ -111,7 +128,13 @@ const ClassModal: React.FC<ClassModalProps> = ({ isOpen, onClose, initialDate, i
     dateObj.setHours(hours, minutes + (formData.durationMinutes || 60));
     const endTime = `${String(dateObj.getHours()).padStart(2, '0')}:${String(dateObj.getMinutes()).padStart(2, '0')}`;
 
+    // Sanitize data
     const dataToSave = { ...formData, endTime } as DrivingClass;
+
+    // If not paid, remove payment method to avoid inconsistent state
+    if (dataToSave.paymentStatus !== PaymentStatus.PAGADO) {
+      delete dataToSave.paymentMethod;
+    }
 
     if (existingClassId) {
       updateClass(existingClassId, dataToSave);
@@ -121,8 +144,14 @@ const ClassModal: React.FC<ClassModalProps> = ({ isOpen, onClose, initialDate, i
     onClose();
   };
 
-  const handleDelete = () => {
-    if (existingClassId && window.confirm('¿Seguro que quieres eliminar esta clase?')) {
+  const handleDeleteClick = () => {
+    if (existingClassId) {
+      setShowDeleteConfirm(true);
+    }
+  };
+
+  const handleConfirmDelete = () => {
+    if (existingClassId) {
       deleteClass(existingClassId);
       onClose();
     }
@@ -306,6 +335,12 @@ const ClassModal: React.FC<ClassModalProps> = ({ isOpen, onClose, initialDate, i
             </div>
           )}
 
+          {error && (
+            <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-lg text-sm font-medium animate-pulse">
+              {error}
+            </div>
+          )}
+
           <div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipo de Clase</label>
@@ -336,7 +371,7 @@ const ClassModal: React.FC<ClassModalProps> = ({ isOpen, onClose, initialDate, i
             {existingClassId && (
               <button
                 type="button"
-                onClick={handleDelete}
+                onClick={handleDeleteClick}
                 className="px-4 py-2 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 rounded-lg flex items-center gap-2 transition-colors"
               >
                 <Trash2 size={18} /> Eliminar
@@ -359,6 +394,17 @@ const ClassModal: React.FC<ClassModalProps> = ({ isOpen, onClose, initialDate, i
           </div>
         </form>
       </div >
+
+      <ConfirmModal
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={handleConfirmDelete}
+        title="Eliminar Clase"
+        message="¿Estás seguro que quieres eliminar esta clase? Esta acción no se puede deshacer."
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        type="danger"
+      />
     </div >
   );
 };

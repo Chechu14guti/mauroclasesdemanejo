@@ -30,6 +30,8 @@ const Billing: React.FC = () => {
     const summary = useMemo(() => {
         let globalPending = 0;
         let globalPaid = 0;
+        let totalCash = 0;
+        let totalTransfer = 0;
 
         // Calculate per student based on FILTERED classes
         const studentData = students.map(s => {
@@ -40,6 +42,14 @@ const Billing: React.FC = () => {
 
             const paid = sClasses.reduce((acc, c) =>
                 c.paymentStatus === PaymentStatus.PAGADO ? acc + c.price : acc, 0);
+
+            // Calculate breakdown for this student (optional, but good for global calc)
+            sClasses.forEach(c => {
+                if (c.paymentStatus === PaymentStatus.PAGADO) {
+                    if (c.paymentMethod === 'Efectivo') totalCash += c.price;
+                    if (c.paymentMethod === 'Transferencia') totalTransfer += c.price;
+                }
+            });
 
             globalPending += pending;
             globalPaid += paid;
@@ -54,7 +64,7 @@ const Billing: React.FC = () => {
             .filter(s => s.total > 0) // Only show students with activity in this period
             .sort((a, b) => b.total - a.total).slice(0, 10); // Top 10
 
-        return { studentData, globalPending, globalPaid };
+        return { studentData, globalPending, globalPaid, totalCash, totalTransfer };
     }, [students, filteredClasses]);
 
     // Monthly breakdown (useful only when 'all' is selected, or to show daily progress if month is selected)
@@ -99,18 +109,23 @@ const Billing: React.FC = () => {
 
         // Summary Section
         doc.setFillColor(240, 240, 240);
-        doc.rect(14, 42, 182, 30, 'F');
+        doc.rect(14, 42, 182, 40, 'F'); // Increased height
         doc.setFontSize(12);
         doc.text(`Total Generado: $${summary.globalPaid + summary.globalPending}`, 20, 52);
         doc.text(`Total Cobrado: $${summary.globalPaid}`, 20, 62);
         doc.text(`Pendiente de Cobro: $${summary.globalPending}`, 100, 62);
 
+        // Breakdown
+        doc.setFontSize(10);
+        doc.text(`En Efectivo: $${summary.totalCash}`, 20, 72);
+        doc.text(`Por Transferencia: $${summary.totalTransfer}`, 100, 72);
+
         // Main Chart Data Table
         doc.setFontSize(14);
-        doc.text(selectedMonth === 'all' ? "Evolución Mensual" : "Evolución Diaria", 14, 85);
+        doc.text(selectedMonth === 'all' ? "Evolución Mensual" : "Evolución Diaria", 14, 95); // Moved down
 
         autoTable(doc, {
-            startY: 90,
+            startY: 100, // Moved down
             head: [[selectedMonth === 'all' ? 'Mes' : 'Día', 'Facturado ($)']],
             body: chartData.map(m => [m.label, `$${m.total}`]),
             theme: 'striped',
@@ -118,7 +133,7 @@ const Billing: React.FC = () => {
         });
 
         // Student Debts Table
-        const finalY = (doc as any).lastAutoTable.finalY || 100;
+        const finalY = (doc as any).lastAutoTable.finalY || 110;
         doc.setFontSize(14);
         doc.text("Detalle por Alumno (Top 10 en período)", 14, finalY + 15);
 
@@ -171,23 +186,14 @@ const Billing: React.FC = () => {
             </div>
 
             {/* KPI Cards (Filtered) */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 flex items-center gap-4 transition-colors">
                     <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full text-blue-600 dark:text-blue-400">
                         <TrendingUp size={24} />
                     </div>
                     <div>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Total Generado ({selectedMonth === 'all' ? 'Histórico' : selectedMonth})</p>
-                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white">$ {summary.globalPaid + summary.globalPending}</h3>
-                    </div>
-                </div>
-                <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 flex items-center gap-4 transition-colors">
-                    <div className="p-3 bg-orange-100 dark:bg-orange-900/30 rounded-full text-orange-600 dark:text-orange-400">
-                        <AlertCircle size={24} />
-                    </div>
-                    <div>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Pendiente de Cobro</p>
-                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white">$ {summary.globalPending}</h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Total Generado</p>
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white">$ {summary.globalPaid + summary.globalPending}</h3>
                     </div>
                 </div>
                 <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 flex items-center gap-4 transition-colors">
@@ -196,7 +202,43 @@ const Billing: React.FC = () => {
                     </div>
                     <div>
                         <p className="text-sm text-gray-500 dark:text-gray-400">Total Cobrado</p>
-                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white">$ {summary.globalPaid}</h3>
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white">$ {summary.globalPaid}</h3>
+                        <div className="text-xs text-gray-400 mt-1 flex gap-2">
+                            <span title="Efectivo">💵 ${summary.totalCash}</span>
+                            <span title="Transferencia">🏦 ${summary.totalTransfer}</span>
+                        </div>
+                    </div>
+                </div>
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 flex items-center gap-4 transition-colors">
+                    <div className="p-3 bg-orange-100 dark:bg-orange-900/30 rounded-full text-orange-600 dark:text-orange-400">
+                        <AlertCircle size={24} />
+                    </div>
+                    <div>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Pendiente</p>
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white">$ {summary.globalPending}</h3>
+                    </div>
+                </div>
+                {/* Empty card or another metric could go here to balance 4 cols, or stick to 3 cols and put details elsewhere. 
+                    Let's stick to 3 cols but make the middle one richer, or use 4 cols and add a specific breakdown card?
+                    The user asked for "un apartado". Let's try to fit it nicely.
+                    I'll use 4 columns and separate Cash/Transfer into their own mini-cards or combine them.
+                    Actually, let's keep the 3 main cards but expand the "Total Cobrado" one or add a 4th card for "Detalle Cobros".
+                    Let's try a 4-column layout for better spacing: Total Generado | Total Cobrado | Efectivo | Transferencia
+                 */}
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col justify-center gap-2 transition-colors">
+                    <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-500 dark:text-gray-400">Efectivo</span>
+                        <span className="font-bold text-gray-900 dark:text-white text-lg">$ {summary.totalCash}</span>
+                    </div>
+                    <div className="w-full bg-gray-100 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                        <div className="bg-green-500 h-full" style={{ width: `${summary.globalPaid > 0 ? (summary.totalCash / summary.globalPaid) * 100 : 0}%` }}></div>
+                    </div>
+                    <div className="flex justify-between items-center mt-1">
+                        <span className="text-sm text-gray-500 dark:text-gray-400">Transferencia</span>
+                        <span className="font-bold text-gray-900 dark:text-white text-lg">$ {summary.totalTransfer}</span>
+                    </div>
+                    <div className="w-full bg-gray-100 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                        <div className="bg-blue-500 h-full" style={{ width: `${summary.globalPaid > 0 ? (summary.totalTransfer / summary.globalPaid) * 100 : 0}%` }}></div>
                     </div>
                 </div>
             </div>
